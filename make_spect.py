@@ -44,7 +44,7 @@ def makeSpect(full_path, prng):
         wav = y
 
     # Compute spect
-    D = pySTFT(wav).T
+    D = pySTFT(wav,hop_length=320).T
     # Convert to mel and normalize
     D_mel = np.dot(D, mel_basis)
     D_db = 20 * np.log10(np.maximum(min_level, D_mel)) - 16

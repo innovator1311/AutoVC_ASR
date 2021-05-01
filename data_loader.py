@@ -67,12 +67,12 @@ class Utterances(data.Dataset):
             len_pad = self.len_crop - tmp_mel.shape[0]
 	    len_ds_pad = self.len_crop // 2 - tmp_deepspeech.shape[0]
             uttr = np.pad(tmp_mel, ((0,len_pad),(0,0)), 'constant')
-	    deepspeech = np.pad(tmp_deepspeech, ((0,len_ds_pad),(0,0)), 'constant') 
+	    deepspeech = np.pad(tmp_deepspeech, ((0,len_pad),(0,0)), 'constant') 
         elif tmp_mel.shape[0] > self.len_crop:
             left = np.random.randint(tmp_mel.shape[0]-self.len_crop)
             uttr = tmp_mel[left:left+self.len_crop, :]
 	    dp_left = left//2
-	    deepspeech = tmp_deepspeech[dp_left:dp_left + self.len_crop//2, :]
+	    deepspeech = tmp_deepspeech[left:left + self.len_crop, :]
         else:
             uttr = tmp_mel
 	    deepspeech = tmp_deepspeech
