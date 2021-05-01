@@ -273,3 +273,24 @@ class Generator(nn.Module):
         
         return mel_outputs, mel_outputs_postnet, phoenems
 
+class Generator_DeepSpeech(nn.Module):
+    """Generator network."""
+    def __init__(self, content_dim=29, dim_emb, dim_pre, freq, dim_attention, num_head, dim_lstm_attentio, train_ASR=False):
+        super(Generator, self).__init__()
+        
+        self.decoder = Decoder(content_dim, dim_emb, dim_pre)
+        self.postnet = Postnet()
+        
+    def forward(self, content, c_trg):
+
+        encoder_outputs = torch.cat((content, c_trg.unsqueeze(1).expand(-1,x.size(1),-1)), dim=-1)
+        
+        mel_outputs = self.decoder(encoder_outputs)
+                
+        mel_outputs_postnet = self.postnet(mel_outputs.transpose(2,1))
+        mel_outputs_postnet = mel_outputs + mel_outputs_postnet.transpose(2,1)
+        
+        mel_outputs = mel_outputs.unsqueeze(1)
+        mel_outputs_postnet = mel_outputs_postnet.unsqueeze(1)
+        
+        return mel_outputs, mel_outputs_postnet
