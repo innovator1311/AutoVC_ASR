@@ -57,7 +57,7 @@ class Solver(object):
         data_loader = self.vcc_loader
         
         # Print logs in specified order
-        keys = ['G/loss_id','G/loss_id_psnt']
+        keys = ['G/loss_id','G/loss_id_psnt','G/loss_cd']
             
         # Start training.
         print('Start training...')
@@ -70,16 +70,15 @@ class Solver(object):
 
             # Fetch data.
             try:
-                x_real, deepspeech_x, emb_org = next(data_iter)
+                x_real, emb_org, phoenemes = next(data_iter)
             except:
                 data_iter = iter(data_loader)
-                x_real, deepspeech_x, emb_org = next(data_iter)
+                x_real, emb_org, phoenemes = next(data_iter)
             
             
-
             x_real = x_real.to(self.device) 
             emb_org = emb_org.type(torch.FloatTensor).to(self.device) 
-       	    deepspeech_x = deepspeech_x.to(self.device)	                 
+                        
        
             # =================================================================================== #
             #                               2. Train the generator                                #
@@ -88,22 +87,31 @@ class Solver(object):
             self.G = self.G.train()
                         
             # Identity mapping loss
-            x_identic, x_identic_psnt, x_phonemes = self.G(deepspeech_x, emb_org)
+            x_identic, x_identic_psnt, x_phonemes = self.G(x_real, emb_org, emb_org)
+            x_identic = x_identic.squeeze()
+            x_identic_psnt = x_identic_psnt.squeeze()
             
             g_loss_id = F.mse_loss(x_real, x_identic)   
             g_loss_id_psnt = F.mse_loss(x_real, x_identic_psnt)   
+            g_loss_phoenemes = F.mse_loss(phoenemes, x_phonemes)
             g_loss = g_loss_id + g_loss_id_psnt
             # Backward and optimize.
             
-            self.reset_grad()
-            g_loss_phoenemes.backward()
-            self.g_optimizer.step()
-            
+            if self.train_ASR:
+                self.reset_grad()
+                g_loss_phoenemes.backward()
+                self.g_optimizer.step()
+            else:
+                self.reset_grad()
+                g_loss.backward()
+                self.g_optimizer.step()
+
             # Logging.
             loss = {}
             loss['G/loss_id'] = g_loss_id.item()
             loss['G/loss_id_psnt'] = g_loss_id_psnt.item()
-                        
+            loss['G/loss_cd'] = g_loss_cd.item()            
+
             # =================================================================================== #
             #                                 4. Miscellaneous                                    #
             # =================================================================================== #

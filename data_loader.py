@@ -10,10 +10,11 @@ from multiprocessing import Process, Manager
 class Utterances(data.Dataset):
     """Dataset class for the Utterances dataset."""
 
-    def __init__(self, root_dir, len_crop):
+    def __init__(self, root_dir, deepspeech_dir, len_crop):
         """Initialize and preprocess the Utterances dataset."""
         self.root_dir = root_dir
-        self.len_crop = len_crop
+        self.deepspeech_dir = deepspeech_dir
+	self.len_crop = len_crop
         self.step = 10
         
         metaname = os.path.join(self.root_dir, "train.pkl")
@@ -45,7 +46,7 @@ class Utterances(data.Dataset):
                 if j < 2:  # fill in speaker id and embedding
                     uttrs[j] = tmp
                 else: # load the mel-spectrograms
-                    uttrs[j] = np.load(os.path.join(self.root_dir, tmp))
+                    uttrs[j] = [os.path.join(self.root_dir, tmp), os.path.join(self.deepspeech_dir, tmp)]
             dataset[idx_offset+k] = uttrs
                    
         
@@ -57,17 +58,26 @@ class Utterances(data.Dataset):
         
         # pick random uttr with random crop
         a = np.random.randint(2, len(list_uttrs))
-        tmp = list_uttrs[a]
-        if tmp.shape[0] < self.len_crop:
-            len_pad = self.len_crop - tmp.shape[0]
-            uttr = np.pad(tmp, ((0,len_pad),(0,0)), 'constant')
-        elif tmp.shape[0] > self.len_crop:
-            left = np.random.randint(tmp.shape[0]-self.len_crop)
-            uttr = tmp[left:left+self.len_crop, :]
-        else:
-            uttr = tmp
         
-        return uttr, emb_org
+	tmp = list_uttrs[a]
+	tmp_mel = np.load(tmp[0])
+	tmp_deepspeech = np.load(tmp[1])
+
+        if tmp_mel.shape[0] < self.len_crop:
+            len_pad = self.len_crop - tmp_mel.shape[0]
+	    len_ds_pad = self.len_crop // 2 - tmp_deepspeech.shape[0]
+            uttr = np.pad(tmp_mel, ((0,len_pad),(0,0)), 'constant')
+	    deepspeech = np.pad(tmp_deepspeech, ((0,len_ds_pad),(0,0)), 'constant') 
+        elif tmp_mel.shape[0] > self.len_crop:
+            left = np.random.randint(tmp_mel.shape[0]-self.len_crop)
+            uttr = tmp_mel[left:left+self.len_crop, :]
+	    dp_left = left//2
+	    deepspeech = tmp_deepspeech[dp_left:dp_left + self.len_crop//2, :]
+        else:
+            uttr = tmp_mel
+	    deepspeech = tmp_deepspeech
+
+        return uttr, deepspeech ,emb_org
     
 
     def __len__(self):

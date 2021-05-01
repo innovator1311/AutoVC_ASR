@@ -290,7 +290,4 @@ class Generator_DeepSpeech(nn.Module):
         mel_outputs_postnet = self.postnet(mel_outputs.transpose(2,1))
         mel_outputs_postnet = mel_outputs + mel_outputs_postnet.transpose(2,1)
         
-        mel_outputs = mel_outputs.unsqueeze(1)
-        mel_outputs_postnet = mel_outputs_postnet.unsqueeze(1)
-        
         return mel_outputs, mel_outputs_postnet
