@@ -39,7 +39,7 @@ for speaker in sorted(subdirList):
         tmp = np.load(os.path.join(dirName, speaker, fileList[idx_uttrs[i]]))
         candidates = np.delete(np.arange(len(fileList)), idx_uttrs)
         # choose another utterance if the current one is too short
-        while tmp.shape[0] < len_crop:
+        while tmp.shape[0] <= len_crop:
             idx_alt = np.random.choice(candidates)
             tmp = np.load(os.path.join(dirName, speaker, fileList[idx_alt]))
             candidates = np.delete(candidates, np.argwhere(candidates==idx_alt))

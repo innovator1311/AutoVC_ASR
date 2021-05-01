@@ -12,10 +12,11 @@ class Utterances(data.Dataset):
 
     def __init__(self, root_dir, deepspeech_dir, len_crop):
         """Initialize and preprocess the Utterances dataset."""
+        
         self.root_dir = root_dir
         self.deepspeech_dir = deepspeech_dir
-	self.len_crop = len_crop
         self.step = 10
+        self.len_crop = len_crop
         
         metaname = os.path.join(self.root_dir, "train.pkl")
         meta = pickle.load(open(metaname, "rb"))
@@ -59,23 +60,23 @@ class Utterances(data.Dataset):
         # pick random uttr with random crop
         a = np.random.randint(2, len(list_uttrs))
         
-	tmp = list_uttrs[a]
-	tmp_mel = np.load(tmp[0])
-	tmp_deepspeech = np.load(tmp[1])
+        tmp = list_uttrs[a]
+        tmp_mel = np.load(tmp[0])
+        tmp_deepspeech = np.load(tmp[1])
 
         if tmp_mel.shape[0] < self.len_crop:
             len_pad = self.len_crop - tmp_mel.shape[0]
-	    len_ds_pad = self.len_crop // 2 - tmp_deepspeech.shape[0]
+	          #len_ds_pad = self.len_crop // 2 - tmp_deepspeech.shape[0]
             uttr = np.pad(tmp_mel, ((0,len_pad),(0,0)), 'constant')
-	    deepspeech = np.pad(tmp_deepspeech, ((0,len_pad),(0,0)), 'constant') 
+            deepspeech = np.pad(tmp_deepspeech, ((0,len_pad),(0,0)), 'constant') 
         elif tmp_mel.shape[0] > self.len_crop:
             left = np.random.randint(tmp_mel.shape[0]-self.len_crop)
             uttr = tmp_mel[left:left+self.len_crop, :]
-	    dp_left = left//2
-	    deepspeech = tmp_deepspeech[left:left + self.len_crop, :]
+            deepspeech = tmp_deepspeech[left:left + self.len_crop, :]
+	          #dp_left = left//2
         else:
             uttr = tmp_mel
-	    deepspeech = tmp_deepspeech
+            deepspeech = tmp_deepspeech	          
 
         return uttr, deepspeech ,emb_org
     
@@ -87,10 +88,10 @@ class Utterances(data.Dataset):
     
     
 
-def get_loader(root_dir, batch_size=16, len_crop=128, num_workers=0):
+def get_loader(root_dir, deepspeech_dir, batch_size=16, len_crop=128, num_workers=0):
     """Build and return a data loader."""
     
-    dataset = Utterances(root_dir, len_crop)
+    dataset = Utterances(root_dir, deepspeech_dir , len_crop)
     
     worker_init_fn = lambda x: np.random.seed((torch.initial_seed()) % (2**32))
     data_loader = data.DataLoader(dataset=dataset,

@@ -1,4 +1,4 @@
-from model_vc import Generator, Generator_RemoveSpeaker
+from model_vc import Generator_DeepSpeech
 import torch
 import torch.nn.functional as F
 import time
@@ -36,9 +36,9 @@ class Solver(object):
             
     def build_model(self):
         
-        self.G = Generator(self.dim_neck, self.dim_emb, self.dim_pre, self.freq)        
+        self.G = Generator_DeepSpeech(self.dim_neck, self.dim_emb, self.dim_pre, self.freq)        
         
-        self.g_optimizer = torch.optim.Adam(self.G.parameters(), 0.0001)
+        self.g_optimizer = torch.optim.Adam(self.G.parameters(), 0.001)
         
         self.G.to(self.device)
         
@@ -88,7 +88,7 @@ class Solver(object):
             self.G = self.G.train()
                         
             # Identity mapping loss
-            x_identic, x_identic_psnt, x_phonemes = self.G(deepspeech_x, emb_org)
+            x_identic, x_identic_psnt = self.G(deepspeech_x, emb_org)
             
             g_loss_id = F.mse_loss(x_real, x_identic)   
             g_loss_id_psnt = F.mse_loss(x_real, x_identic_psnt)   
@@ -96,7 +96,7 @@ class Solver(object):
             # Backward and optimize.
             
             self.reset_grad()
-            g_loss_phoenemes.backward()
+            g_loss.backward()
             self.g_optimizer.step()
             
             # Logging.

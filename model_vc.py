@@ -129,7 +129,7 @@ class Decoder(nn.Module):
     def __init__(self, dim_neck, dim_emb, dim_pre):
         super(Decoder, self).__init__()
         
-        self.lstm1 = nn.LSTM(dim_neck*2+dim_emb, dim_pre, 1, batch_first=True)
+        self.lstm1 = nn.LSTM(dim_neck+dim_emb, dim_pre, 1, batch_first=True)
         
         convolutions = []
         for i in range(3):
@@ -275,15 +275,15 @@ class Generator(nn.Module):
 
 class Generator_DeepSpeech(nn.Module):
     """Generator network."""
-    def __init__(self, content_dim=29, dim_emb, dim_pre, freq, dim_attention, num_head, dim_lstm_attentio, train_ASR=False):
-        super(Generator, self).__init__()
+    def __init__(self, content_dim, dim_emb, dim_pre, freq, train_ASR=False):
+        super(Generator_DeepSpeech, self).__init__()
         
         self.decoder = Decoder(content_dim, dim_emb, dim_pre)
         self.postnet = Postnet()
         
     def forward(self, content, c_trg):
 
-        encoder_outputs = torch.cat((content, c_trg.unsqueeze(1).expand(-1,x.size(1),-1)), dim=-1)
+        encoder_outputs = torch.cat((content, c_trg.unsqueeze(1).expand(-1,content.size(1),-1)), dim=-1)
         
         mel_outputs = self.decoder(encoder_outputs)
                 
