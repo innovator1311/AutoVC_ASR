@@ -34,7 +34,7 @@ if __name__ == '__main__':
     
     # Training configuration.
     parser.add_argument('--data_dir', type=str, default='./spmel')
-    parser.add_argument('--deepspeech_dir', type=str, default='./deepspeech')
+    parser.add_argument('--deepspeech_dir', type=str, default='../final_deepspeech')
     parser.add_argument('--batch_size', type=int, default=2, help='mini-batch size')
     parser.add_argument('--num_iters', type=int, default=1000000, help='number of total iterations')
     parser.add_argument('--checkpoint_iters', type=int, default=1000, help='number of total iterations to save checkpoint')

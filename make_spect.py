@@ -6,7 +6,6 @@ from scipy import signal
 from scipy.signal import get_window
 from librosa.filters import mel
 from numpy.random import RandomState
-from speaker_dct import speaker_dct
 
 def butter_highpass(cutoff, fs, order=5):
     nyq = 0.5 * fs
