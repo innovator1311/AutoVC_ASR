@@ -11,13 +11,14 @@ from multiprocessing import Process, Manager
 class Utterances(data.Dataset):
     """Dataset class for the Utterances dataset."""
 
-    def __init__(self, root_dir, deepspeech_dir, len_crop):
+    def __init__(self, root_dir, deepspeech_dir, f0_dir, len_crop):
         """Initialize and preprocess the Utterances dataset."""
         
         self.root_dir = root_dir
         self.deepspeech_dir = deepspeech_dir
         self.step = 10
         self.len_crop = len_crop
+        self.f0_dir = f0_dir
         
         metaname = os.path.join(self.root_dir, "train.pkl")
         meta = pickle.load(open(metaname, "rb"))
@@ -68,25 +69,26 @@ class Utterances(data.Dataset):
         tmp = list_uttrs[a]
         tmp_mel = np.load(tmp[0])
         tmp_deepspeech = np.load(tmp[1])
+        tmp_f0 = np.load(tmp[2])
 
         if tmp_mel.shape[0] < self.len_crop:
             len_pad = self.len_crop - tmp_mel.shape[0]
 	          #len_ds_pad = self.len_crop // 2 - tmp_deepspeech.shape[0]
             uttr = np.pad(tmp_mel, ((0,len_pad),(0,0)), 'constant')
             deepspeech = np.pad(tmp_deepspeech, ((0,len_pad),(0,0)), 'constant') 
+            f0 = np.pad(tmp_f0, (0,len_pad), 'constant')
         elif tmp_mel.shape[0] > self.len_crop:
             left = np.random.randint(tmp_mel.shape[0]-self.len_crop)
             uttr = tmp_mel[left:left+self.len_crop, :]
             deepspeech = tmp_deepspeech[left:left + self.len_crop, :]
-	          #dp_left = left//2
+            f0 = tmp_f0[left:left + self.len_crop]
+	        #dp_left = left//2
         else:
             uttr = tmp_mel
             deepspeech = tmp_deepspeech	      
+            f0 = tmp_f0
 
-        
-    
-
-        return uttr, deepspeech ,emb_org
+        return uttr, deepspeech ,emb_org, f0
     
 
     def __len__(self):
