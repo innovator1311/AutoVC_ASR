@@ -36,9 +36,10 @@ class Solver(object):
             
     def build_model(self):
         
-        self.G = Generator_DeepSpeech_F0(self.dim_neck, self.dim_emb, self.dim_pre, self.freq)        
-        
-        self.g_optimizer = torch.optim.Adam(self.G.parameters(), 0.001)
+        #self.G = Generator_DeepSpeech_F0(self.dim_neck, self.dim_emb, self.dim_pre, self.freq)        
+        self.G = torch.load("../gdrive/MyDrive/MultiSpeaker_TTS/checkpoints/autovc_50000.pt")
+
+        self.g_optimizer = torch.optim.Adam(self.G.parameters(), 0.0001)
         
         self.G.to(self.device)
         
@@ -120,7 +121,7 @@ class Solver(object):
 
             # Save checkpoint
             if (i+1) % self.checkpoint_iters == 0:
-                torch.save(self.G, "checkpoints/autovc_{}.pt".format(i+1))
+                torch.save(self.G, "../gdrive/MyDrive/MultiSpeaker_TTS/F0_checkpoints/autovc_{}.pt".format(i+1))
                 
 
     

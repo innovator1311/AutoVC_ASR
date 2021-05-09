@@ -13,7 +13,7 @@ def main(config):
     cudnn.benchmark = True
 
     # Data loader.
-    vcc_loader = get_loader(config.data_dir, config.deepspeech_dir, config.batch_size, config.len_crop)
+    vcc_loader = get_loader(config.data_dir, config.deepspeech_dir, config.f0_dir , config.batch_size, config.len_crop)
     
     solver = Solver(vcc_loader, config)
 
@@ -36,9 +36,9 @@ if __name__ == '__main__':
     parser.add_argument('--data_dir', type=str, default='./spmel')
     parser.add_argument('--deepspeech_dir', type=str, default='../final_deepspeech')
     parser.add_argument('--f0_dir', type=str, default='../final_f0')
-    parser.add_argument('--batch_size', type=int, default=8, help='mini-batch size')
+    parser.add_argument('--batch_size', type=int, default=2, help='mini-batch size')
     parser.add_argument('--num_iters', type=int, default=1000000, help='number of total iterations')
-    parser.add_argument('--checkpoint_iters', type=int, default=1000, help='number of total iterations to save checkpoint')
+    parser.add_argument('--checkpoint_iters', type=int, default=20000, help='number of total iterations to save checkpoint')
     parser.add_argument('--len_crop', type=int, default=128, help='dataloader output sequence length')
     
     # Miscellaneous.

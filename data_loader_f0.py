@@ -71,6 +71,19 @@ class Utterances(data.Dataset):
         tmp_deepspeech = np.load(tmp[1])
         tmp_f0 = np.load(tmp[2])
 
+        while tmp_mel.shape[0] != tmp_deepspeech.shape[0]:
+          
+          a = np.random.randint(2, len(list_uttrs))
+        
+          tmp = list_uttrs[a]
+          tmp_mel = np.load(tmp[0])
+          tmp_deepspeech = np.load(tmp[1])
+          tmp_f0 = np.load(tmp[2])
+
+        if tmp_f0.shape[0] < tmp_mel.shape[0]:
+            pad_len = tmp_mel.shape[0] - tmp_f0.shape[0]
+            tmp_f0 = np.pad(tmp_f0, (0, pad_len), 'constant')
+
         if tmp_mel.shape[0] < self.len_crop:
             len_pad = self.len_crop - tmp_mel.shape[0]
 	          #len_ds_pad = self.len_crop // 2 - tmp_deepspeech.shape[0]
@@ -96,10 +109,10 @@ class Utterances(data.Dataset):
         return self.num_tokens
     
 
-def get_loader(root_dir, deepspeech_dir, batch_size=16, len_crop=128, num_workers=0):
+def get_loader(root_dir, deepspeech_dir, f0_dir  , batch_size=16, len_crop=128, num_workers=0):
     """Build and return a data loader."""
     
-    dataset = Utterances(root_dir, deepspeech_dir , len_crop)
+    dataset = Utterances(root_dir, deepspeech_dir, f0_dir ,len_crop)
     
     worker_init_fn = lambda x: np.random.seed((torch.initial_seed()) % (2**32))
     data_loader = data.DataLoader(dataset=dataset,
