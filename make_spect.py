@@ -79,7 +79,7 @@ if __name__ == "__main__":
         for fileName in sorted(fileList):
 
             full_path = os.path.join(dirName,subdir,fileName)
-            S = makeSpect(full_path, prng)
+            S = makeSpect(full_path, None)
             np.save(os.path.join(targetDir, subdir, fileName[:-4]),
                     S.astype(np.float32), allow_pickle=False)    
         
